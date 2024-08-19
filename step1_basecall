@@ -1,1 +1,11 @@
+# Sequencing files need to be in pod5 format for this command. If they are fast5, they can be converted using the nanopore pod5 tool "pod5 convert fast5"
+# This command will basecall pod5 files using the "super accurate" RNA basecalling model and will output a fastq file without adapter trimming (to preserve the polyA/polyU regions)
 
+
+POD5_DIR=pod5_directory_path
+OUT_FILE=output_name.fastq
+MODEL_PATH=path_to_dorado/models/rna004_130bps_sup@v3.0.1
+
+dorado basecaller --device cuda:1,2,3 --emit-fastq --no-trim $MODEL_PATH "$POD5_DIR" > "$OUT_FILE"
+
+# change 'device' option as needed
