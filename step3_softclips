@@ -1,1 +1,12 @@
+# this step can be performed on the bam file output from the alignment step or on a bam file filtered for specific reads (such as rRNA in the paper)
 
+# pull out the soft-clipped sequences, plus 5 extra bases upstream of the soft clip in case part of the polyU/polyA tail was not clipped
+BAM=bam_file
+FASTA=fasta_output_filename
+FASTA_FILTERED=filtered_fasta_filename
+
+
+bash softclip_seq_strand.sh $BAM > $FASTA
+
+# Remove clipped regions less than 10 bases, then pull out the sequence in the first 45 bases from each soft clipped region
+seqkit seq -m 10 $FASTA | seqkit subseq -r 1:45 > $FASTA_FILTERED
