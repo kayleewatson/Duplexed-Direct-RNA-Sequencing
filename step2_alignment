@@ -1,1 +1,9 @@
+# these commands will align the untrimmed fastq reads against a reference and filter for primary alignments
 
+REF_FILE=reference_fasta
+FASTQ_FILE=dorado_fastq_output
+OUT_FILE=alignment_output.sam
+FILTERED_BAM=filtered_alignment.bam
+
+minimap2 -ax map-ont $REF_FILE $FASTQ_FILE > $OUT_FILE
+samtools view -bhF 2308 $OUT_FILE | samtools sort -o $FILTERED_BAM
