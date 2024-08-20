@@ -1,1 +1,21 @@
+# start by just removing the obvious polyA reads
+# this pulls out 6 A's in a row, with no mismatches
+fuzznuc -sequence 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA_softclips_first45.fasta -pattern 'A(6)' -outfile 20240308_Scerevisiae_duplex_004_A6.txt
+grep 'Sequence:' 20240308_Scerevisiae_duplex_004_A6.txt | awk '{print $3}' > 20240308_Scerevisiae_duplex_004_A6_reads.txt && rm 20240308_Scerevisiae_duplex_004_A6.txt
 
+# pull out read IDs for reads where polyA was not detected
+grep '>' 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA_softclips_first45.fasta | grep -vf 20240308_Scerevisiae_duplex_004_A6_reads.txt | cut -c2- > 20240308_Scerevisiae_duplex_004_nonA6_reads.txt
+
+# 3,002,725 reads with polyA detected
+# 1,602,226 reads with polyA not detected
+
+# filter rRNA bam file for reads with polyA and reads where polyA was not detected
+# the reads list needs to be split, not enough memory to run the commands
+head -1501362 20240308_Scerevisiae_duplex_004_A6_reads.txt > 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.txt
+tail -1501363 20240308_Scerevisiae_duplex_004_A6_reads.txt > 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.txt
+samtools view 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA.bam | grep -f 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.txt > 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.sam
+samtools view 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA.bam | grep -f 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.txt > 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.sam
+cat rRNA_header.txt 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.sam 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.sam | samtools view -bho 20240308_Scerevisiae_duplex_004_A6_reads.bam
+
+samtools view 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA.bam | grep -f 20240308_Scerevisiae_duplex_004_nonA6_reads.txt > 20240308_Scerevisiae_duplex_004_nonA6_reads.sam
+cat rRNA_header.txt 20240308_Scerevisiae_duplex_004_nonA6_reads.sam | samtools view -bho 20240308_Scerevisiae_duplex_004_nonA6_reads.bam
