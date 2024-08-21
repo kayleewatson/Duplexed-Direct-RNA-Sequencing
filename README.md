@@ -2,11 +2,16 @@
 
 ![Steps](/images/demultiplex_steps.png)
 
-Package requirements:
+### Package requirements:
 
 Dorado
+
 minimap2
+
 Python
+
 seqkit
+
 samtools
+
 fuzznuc
