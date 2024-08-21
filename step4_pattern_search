@@ -1,21 +1,28 @@
 # start by just removing the obvious polyA reads
 # this pulls out 6 A's in a row, with no mismatches
-fuzznuc -sequence 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA_softclips_first45.fasta -pattern 'A(6)' -outfile 20240308_Scerevisiae_duplex_004_A6.txt
-grep 'Sequence:' 20240308_Scerevisiae_duplex_004_A6.txt | awk '{print $3}' > 20240308_Scerevisiae_duplex_004_A6_reads.txt && rm 20240308_Scerevisiae_duplex_004_A6.txt
+
+FASTA_FILTERED=filtered_fasta_from_step3
+FUZZNUC_POLYA=fuzznuc_output_name_polya
+FUZZNUC_POLYU=fuzznuc_output_name_polyu
+POLYA_READS=filename_for_polyA_read_IDs
+NON_POLYA_READS=filename_for_nonpolyA_read_IDs
+NON_POLYA_FASTA=nonpolyA_fasta_name
+POLYU_READS=filename_for_polyU_read_IDs
+BAM=bam_file (same bam file from step 3)
+POLYA_BAM=polya_filename.bam
+POLYU_BAM=polyu_filename.bam
+
+fuzznuc -sequence $FASTA_FILTERED -pattern 'A(6)' -outfile $FUZZNUC_POLYA
+grep 'Sequence:' $FUZZNUC_POLYA | awk '{print $3}' > $POLYA_READS && rm $FUZZNUC_POLYA
 
 # pull out read IDs for reads where polyA was not detected
-grep '>' 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA_softclips_first45.fasta | grep -vf 20240308_Scerevisiae_duplex_004_A6_reads.txt | cut -c2- > 20240308_Scerevisiae_duplex_004_nonA6_reads.txt
+grep '>' $FASTA_FILTERED | grep -vf $POLYA_READS | cut -c2- > $NON_POLYA_READS
 
-# 3,002,725 reads with polyA detected
-# 1,602,226 reads with polyA not detected
+grep --no-group-separator -A 1 -f $NON_POLYA_READS $FASTA_FILTERED > $NON_POLYA_FASTA
+fuzznuc -sequence $NON_POLYA_FASTA -pattern 'T(6)' -outfile $FUZZNUC_POLYU
+grep 'Sequence:' $FUZZNUC_POLYU | awk '{print $3}' > $POLYU_READS && rm $FUZZNUC_POLYU
 
-# filter rRNA bam file for reads with polyA and reads where polyA was not detected
-# the reads list needs to be split, not enough memory to run the commands
-head -1501362 20240308_Scerevisiae_duplex_004_A6_reads.txt > 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.txt
-tail -1501363 20240308_Scerevisiae_duplex_004_A6_reads.txt > 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.txt
-samtools view 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA.bam | grep -f 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.txt > 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.sam
-samtools view 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA.bam | grep -f 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.txt > 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.sam
-cat rRNA_header.txt 20240308_Scerevisiae_duplex_004_A6_reads_firsthalf.sam 20240308_Scerevisiae_duplex_004_A6_reads_secondhalf.sam | samtools view -bho 20240308_Scerevisiae_duplex_004_A6_reads.bam
-
-samtools view 20240308_Scerevisiae_duplex_004_untrimmed_genomic_rRNA.bam | grep -f 20240308_Scerevisiae_duplex_004_nonA6_reads.txt > 20240308_Scerevisiae_duplex_004_nonA6_reads.sam
-cat rRNA_header.txt 20240308_Scerevisiae_duplex_004_nonA6_reads.sam | samtools view -bho 20240308_Scerevisiae_duplex_004_nonA6_reads.bam
+# filter bam file for reads with polyA, then for reads with polyU
+samtools view -H $BAM > header.txt
+samtools view -h $BAM | grep -f $POLYA_READS > temp && cat header.txt temp | samtools view -bho $POLYA_BAM && rm temp
+samtools view -h $BAM | grep -f $POLYU_READS > temp && cat header.txt temp | samtools view -bho $POLYU_BAM && rm temp
