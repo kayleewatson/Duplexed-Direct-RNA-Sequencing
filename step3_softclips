@@ -2,8 +2,8 @@
 
 # pull out the soft-clipped sequences, plus 5 extra bases upstream of the soft clip in case part of the polyU/polyA tail was not clipped
 BAM=bam_file
-FASTA=fasta_output_filename
-FASTA_FILTERED=filtered_fasta_filename
+FASTA=softclip_fasta_output_filename
+FASTA_FILTERED=filtered_softclip_fasta_filename
 
 bash softclip_seq.sh $BAM > $FASTA
 # Remove clipped regions less than 10 bases, then pull out the sequence in the first 45 bases from each soft clipped region
