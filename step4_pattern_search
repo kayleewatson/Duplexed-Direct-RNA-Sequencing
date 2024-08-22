@@ -1,5 +1,7 @@
 # start by just removing the obvious polyA reads
-# this pulls out 6 A's in a row, with no mismatches
+## THIS EXTRACTS SEQUENCES WITH 6 A's IN A ROW, WITH NO MISMATCHES. 
+## THE PATTERN SEARCH PARAMETER CAN BE ALTERED FOR A MORE OR LESS STRINGENT SEARCH.
+## HOWEVER, BE AWARE THAT SOME READS MAY HAVE SMALL STRETCHES OF BOTH A's AND U's
 
 FASTA_FILTERED=filtered_fasta_from_step3
 FUZZNUC_POLYA=fuzznuc_output_name_polya
@@ -23,6 +25,7 @@ fuzznuc -sequence $NON_POLYA_FASTA -pattern 'T(6)' -outfile $FUZZNUC_POLYU
 grep 'Sequence:' $FUZZNUC_POLYU | awk '{print $3}' > $POLYU_READS && rm $FUZZNUC_POLYU
 
 # filter bam file for reads with polyA, then for reads with polyU
+## if there are issues with this due to large file size, the bam file can be split prior to this step, then concatenated at the end
 samtools view -H $BAM > header.txt
 samtools view -h $BAM | grep -f $POLYA_READS > temp && cat header.txt temp | samtools view -bho $POLYA_BAM && rm temp
 samtools view -h $BAM | grep -f $POLYU_READS > temp && cat header.txt temp | samtools view -bho $POLYU_BAM && rm temp
