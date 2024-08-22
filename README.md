@@ -15,8 +15,8 @@
 ### Using the commands and scripts
 Use the commands in each 'step' in order:
 1. [step1_basecall](step1_basecall)
-2. step2_alignment
-3. step3_softclips
-4. step4_pattern_search
+2. [step2_alignment](step2_alignment)
+3. [step3_softclips](step3_softclips)
+4. [step4_pattern_search](step4_pattern_search)
 
-[NOTE]: For step3_softclips to work properly, the softclip_fasta.py and softclip_seq.sh scripts need to be downloaded and placed in the same directory
+[NOTE]: For step3_softclips to work properly, the [softclip_fasta.py] and softclip_seq.sh scripts need to be downloaded and placed in the same directory
