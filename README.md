@@ -14,7 +14,7 @@
 
 ### Using the commands and scripts
 Use the commands in each 'step' in order:
-1. step1_basecall(step1_basecall)
+1. [step1_basecall](step1_basecall)
 2. step2_alignment
 3. step3_softclips
 4. step4_pattern_search
