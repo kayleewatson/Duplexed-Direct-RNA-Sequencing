@@ -5,8 +5,6 @@ BAM=bam_file
 FASTA=fasta_output_filename
 FASTA_FILTERED=filtered_fasta_filename
 
-
 bash softclip_seq.sh $BAM > $FASTA
-
 # Remove clipped regions less than 10 bases, then pull out the sequence in the first 45 bases from each soft clipped region
 seqkit seq -m 10 $FASTA | seqkit subseq -r 1:45 > $FASTA_FILTERED
