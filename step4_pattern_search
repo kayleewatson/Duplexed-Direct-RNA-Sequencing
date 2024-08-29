@@ -14,7 +14,7 @@ grep 'Sequence:' polya.fuzznuc | awk '{print $3}' > polya_reads.txt && rm polya.
 grep '>' $FASTA_FILTERED | grep -vf polya_reads.txt | cut -c2- > non_polya_reads.txt
 
 grep --no-group-separator -A 1 -f non_polya_reads.txt $FASTA_FILTERED > non_polya.fasta
-fuzznuc -sequence $NON_POLYA_FASTA -pattern 'T(6)' -outfile polyu.fuzznuc
+fuzznuc -sequence non_polya.fasta -pattern 'T(6)' -outfile polyu.fuzznuc
 grep 'Sequence:' polyu.fuzznuc | awk '{print $3}' > polyu_reads.txt && rm polyu.fuzznuc
 
 # filter bam file for reads with polyA, then for reads with polyU
