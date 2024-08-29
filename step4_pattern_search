@@ -3,28 +3,22 @@
 ## HOWEVER, BE AWARE THAT SOME READS MAY HAVE SMALL STRETCHES OF BOTH A's AND U's
 
 FASTA_FILTERED=filtered_fasta_from_step3
-FUZZNUC_POLYA=fuzznuc_output_name_polya
-FUZZNUC_POLYU=fuzznuc_output_name_polyu
-POLYA_READS=filename_for_polyA_read_IDs
-NON_POLYA_READS=filename_for_nonpolyA_read_IDs
-NON_POLYA_FASTA=nonpolyA_fasta_name
-POLYU_READS=filename_for_polyU_read_IDs
 BAM=bam_file (same bam file from step 3)
 POLYA_BAM=polya_filename.bam
 POLYU_BAM=polyu_filename.bam
 
-fuzznuc -sequence $FASTA_FILTERED -pattern 'A(6)' -outfile $FUZZNUC_POLYA
-grep 'Sequence:' $FUZZNUC_POLYA | awk '{print $3}' > $POLYA_READS && rm $FUZZNUC_POLYA
+fuzznuc -sequence $FASTA_FILTERED -pattern 'A(6)' -outfile polya.fuzznuc
+grep 'Sequence:' polya.fuzznuc | awk '{print $3}' > polya_reads.txt && rm polya.fuzznuc
 
 # pull out read IDs for reads where polyA was not detected
-grep '>' $FASTA_FILTERED | grep -vf $POLYA_READS | cut -c2- > $NON_POLYA_READS
+grep '>' $FASTA_FILTERED | grep -vf polya_reads.txt | cut -c2- > non_polya_reads.txt
 
-grep --no-group-separator -A 1 -f $NON_POLYA_READS $FASTA_FILTERED > $NON_POLYA_FASTA
-fuzznuc -sequence $NON_POLYA_FASTA -pattern 'T(6)' -outfile $FUZZNUC_POLYU
-grep 'Sequence:' $FUZZNUC_POLYU | awk '{print $3}' > $POLYU_READS && rm $FUZZNUC_POLYU
+grep --no-group-separator -A 1 -f non_polya_reads.txt $FASTA_FILTERED > non_polya.fasta
+fuzznuc -sequence $NON_POLYA_FASTA -pattern 'T(6)' -outfile polyu.fuzznuc
+grep 'Sequence:' polyu.fuzznuc | awk '{print $3}' > polyu_reads.txt && rm polyu.fuzznuc
 
 # filter bam file for reads with polyA, then for reads with polyU
 ## if there are issues with this due to large file size, the bam file can be split prior to this step, then concatenated at the end
 samtools view -H $BAM > header.txt
-samtools view -h $BAM | grep -f $POLYA_READS > temp && cat header.txt temp | samtools view -bho $POLYA_BAM && rm temp
-samtools view -h $BAM | grep -f $POLYU_READS > temp && cat header.txt temp | samtools view -bho $POLYU_BAM && rm temp
+samtools view -h $BAM | grep -f polya_reads.txt > temp && cat header.txt temp | samtools view -bho $POLYA_BAM && rm temp
+samtools view -h $BAM | grep -f polyu_reads.txt > temp && cat header.txt temp | samtools view -bho $POLYU_BAM && rm temp
