@@ -1,8 +1,7 @@
 #!/usr/bin/bash
 
-tmpfile=$(mktemp --suffix=.txt)
-samtools view $@ | awk '{print $1":"$2"+"$6">"$10}' > $tmpfile
+samtools view $@ | awk '{print $1":"$2"+"$6">"$10}' > softclip_seq_preanalysis_format.txt
 
-python ./softclip_fasta.py $tmpfile
+python ./softclip_fasta.py softclip_seq_preanalysis_format.txt
 
-rm $tmpfile
+rm softclip_seq_preanalysis_format.txt
