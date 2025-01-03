@@ -11,14 +11,14 @@ fuzznuc -sequence $FASTA_FILTERED -pattern 'A(6)' -outfile polya.fuzznuc
 grep 'Sequence:' polya.fuzznuc | awk '{print $3}' > polya_reads.txt && rm polya.fuzznuc
 
 # pull out read IDs for reads where polyA was not detected
-grep '>' $FASTA_FILTERED | grep -vf polya_reads.txt | cut -c2- > non_polya_reads.txt
+grep '>' $FASTA_FILTERED | grep -vFf polya_reads.txt | cut -c2- > non_polya_reads.txt
 
-grep --no-group-separator -A 1 -f non_polya_reads.txt $FASTA_FILTERED > non_polya.fasta
+grep --no-group-separator -A 1 -Ff non_polya_reads.txt $FASTA_FILTERED > non_polya.fasta
 fuzznuc -sequence non_polya.fasta -pattern 'T(6)' -outfile polyu.fuzznuc
 grep 'Sequence:' polyu.fuzznuc | awk '{print $3}' > polyu_reads.txt && rm polyu.fuzznuc
 
 # filter bam file for reads with polyA, then for reads with polyU
 ## if there are issues with this due to large file size, the bam file can be split prior to this step, then concatenated at the end
 samtools view -H $BAM > header.txt
-samtools view -h $BAM | grep -f polya_reads.txt > temp && cat header.txt temp | samtools view -bho $POLYA_BAM && rm temp
-samtools view -h $BAM | grep -f polyu_reads.txt > temp && cat header.txt temp | samtools view -bho $POLYU_BAM && rm temp
+samtools view -h $BAM | grep -Ff polya_reads.txt > temp && cat header.txt temp | samtools view -bho $POLYA_BAM && rm temp
+samtools view -h $BAM | grep -Ff polyu_reads.txt > temp && cat header.txt temp | samtools view -bho $POLYU_BAM && rm temp
